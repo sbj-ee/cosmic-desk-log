@@ -1,0 +1,14 @@
+[Unit]
+Description=COSMIC desk journal log widget
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/cosmic-desk-log
+Restart=on-failure
+RestartSec=3
+Environment=RUST_LOG=cosmic_desk_log=info
+
+[Install]
+WantedBy=graphical-session.target

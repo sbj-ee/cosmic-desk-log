@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=COSMIC Desk Log
+Comment=Streams the system journal as a desktop-behind widget
+Type=Application
+Exec=cosmic-desk-log
+Icon=utilities-system-monitor-symbolic
+Terminal=false
+Categories=System;Monitor;COSMIC;
+StartupNotify=false

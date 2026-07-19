@@ -1,0 +1,42 @@
+[package]
+name = "cosmic-desk-log"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "COSMIC desk widget that streams the systemd journal behind open windows"
+repository = "https://github.com/sbj-ee/cosmic-desk-log"
+readme = "README.md"
+
+[dependencies]
+libcosmic = { git = "https://github.com/pop-os/libcosmic", default-features = false, features = [
+    "winit",
+    "tokio",
+    "wayland",
+    "multi-window",
+] }
+tokio = { version = "1", features = ["process", "io-util", "time"] }
+
+[profile.release]
+lto = "thin"
+strip = true
+
+# Packaging metadata for `cargo deb` (https://github.com/kornelski/cargo-deb).
+# Build with: cargo deb
+[package.metadata.deb]
+maintainer = "Stephen B. Johnson <49662809+sbj-ee@users.noreply.github.com>"
+copyright = "2026 Stephen B. Johnson"
+license-file = ["LICENSE", "0"]
+extended-description = """
+A Conky-style COSMIC desk widget that streams the systemd journal on a Wayland
+Bottom layer surface — above the wallpaper, under all normal windows — so it
+reads as part of the desktop."""
+section = "utils"
+priority = "optional"
+depends = "$auto"
+assets = [
+    ["target/release/cosmic-desk-log", "usr/bin/", "755"],
+    ["data/io.github.sbj_ee.CosmicDeskLog.desktop", "usr/share/applications/", "644"],
+    ["systemd/cosmic-desk-log.service", "usr/lib/systemd/user/", "644"],
+    ["README.md", "usr/share/doc/cosmic-desk-log/README.md", "644"],
+    ["LICENSE", "usr/share/doc/cosmic-desk-log/LICENSE", "644"],
+]
