@@ -16,7 +16,7 @@ use cosmic::surface::action::{app_layer_shell, LiveSettings};
 use cosmic::widget::{column, container, text};
 use cosmic::{Application, Element};
 
-use config::{Config, Position};
+use config::{Config, Position, WidthSpec};
 use journal::{LogLine, Severity};
 
 fn main() -> cosmic::iced::Result {
@@ -71,29 +71,38 @@ impl Application for DeskLog {
             scroll_id,
         };
 
-        let width = config.width.resolve();
-        let height = config.height;
         let margin_left = config.margin_left;
         let margin_top = config.margin_top;
         let margin_bottom = config.margin_bottom;
         let position = config.position;
         let id = surface_id;
 
+        let width = config.width.resolve(margin_left.max(0) as u32);
+        let height = config.height;
+
+        // Spanning the output means anchoring to both side edges, with the
+        // left margin mirrored as a gutter on the right.
+        let (horizontal_anchor, margin_right) = if config.width == WidthSpec::Full {
+            (Anchor::LEFT.union(Anchor::RIGHT), margin_left)
+        } else {
+            (Anchor::LEFT, 0)
+        };
+
         let (anchor, margin) = match position {
             Position::Top => (
-                Anchor::TOP.union(Anchor::LEFT),
+                Anchor::TOP.union(horizontal_anchor),
                 IcedMargin {
                     top: margin_top,
-                    right: 0,
+                    right: margin_right,
                     bottom: 0,
                     left: margin_left,
                 },
             ),
             Position::Bottom => (
-                Anchor::BOTTOM.union(Anchor::LEFT),
+                Anchor::BOTTOM.union(horizontal_anchor),
                 IcedMargin {
                     top: 0,
-                    right: 0,
+                    right: margin_right,
                     bottom: margin_bottom,
                     left: margin_left,
                 },

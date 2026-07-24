@@ -2,7 +2,7 @@
 
 A Conky-style desk widget for [COSMIC](https://system76.com/cosmic) that streams
 the systemd journal on a Wayland **Bottom** layer surface — above the wallpaper,
-under every normal window — anchored to the left edge at the top or bottom.
+under every normal window — spanning the screen at the top or bottom.
 
 Clicks pass through the widget to the desktop beneath it.
 
@@ -37,16 +37,18 @@ Optional file: `~/.config/cosmic-desk-log/config`
 
 ```
 # Logical size of the desk panel
-# width=half (default) → ~50% of the active display via cosmic-randr
+# width=full (default) → the full active display via cosmic-randr, less margins
+# width=half           → ~50% of the active display
 # width=960            → fixed pixels
-width=half
+width=full
 height=280
 
-# Left edge, top or bottom of the screen
+# Top or bottom of the screen
 position=bottom
 # position=top
 
-# Margins from the left + chosen vertical edge (clear of panel/dock)
+# Margins from the side + chosen vertical edge (clear of panel/dock).
+# margin_left is mirrored on the right when width=full.
 margin_left=24
 margin_top=48
 margin_bottom=72

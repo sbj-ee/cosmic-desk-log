@@ -7,8 +7,8 @@ const DEFAULT_MARGIN_BOTTOM: i32 = 72;
 const DEFAULT_FONT_SIZE: f32 = 12.0;
 const DEFAULT_OPACITY: f32 = 0.35;
 const DEFAULT_MAX_LINES: usize = 200;
-/// Used when `cosmic-randr` cannot report a current mode (half of 1920).
-const FALLBACK_HALF_WIDTH: u32 = 960;
+/// Used when `cosmic-randr` cannot report a current mode.
+const FALLBACK_WIDTH: u32 = 1920;
 
 /// Vertical edge on the left side of the screen.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -28,10 +28,11 @@ impl Position {
     }
 }
 
-/// Panel width: half the active output, or an explicit pixel size.
+/// Panel width: the whole active output, half of it, or an explicit pixel size.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum WidthSpec {
     #[default]
+    Full,
     Half,
     Pixels(u32),
 }
@@ -39,20 +40,30 @@ pub enum WidthSpec {
 impl WidthSpec {
     fn parse(value: &str) -> Option<Self> {
         let value = value.trim();
-        if value.eq_ignore_ascii_case("half") || value == "0" {
+        if value.eq_ignore_ascii_case("full") || value.eq_ignore_ascii_case("screen") || value == "0"
+        {
+            return Some(Self::Full);
+        }
+        if value.eq_ignore_ascii_case("half") {
             return Some(Self::Half);
         }
         value
             .parse::<u32>()
             .ok()
-            .map(|px| Self::Pixels(px.clamp(120, 4096)))
+            .map(|px| Self::Pixels(px.clamp(120, 8192)))
     }
 
-    pub fn resolve(self) -> u32 {
+    /// `gutter` is the margin left free on each side; it only applies to
+    /// output-relative widths, since explicit pixel sizes are taken as given.
+    pub fn resolve(self, gutter: u32) -> u32 {
         match self {
-            Self::Half => {
-                (active_output_width().unwrap_or(FALLBACK_HALF_WIDTH * 2) / 2).clamp(120, 4096)
-            }
+            Self::Full => active_output_width()
+                .unwrap_or(FALLBACK_WIDTH)
+                .saturating_sub(gutter * 2)
+                .clamp(120, 8192),
+            Self::Half => (active_output_width().unwrap_or(FALLBACK_WIDTH) / 2)
+                .saturating_sub(gutter)
+                .clamp(120, 8192),
             Self::Pixels(px) => px,
         }
     }
